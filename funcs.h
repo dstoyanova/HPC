@@ -13,6 +13,11 @@
 
 #include "common.h"
 
+float uniform0to1Random();
+float myRandom(float a, float b);
+
+float distance(float x, float y, float z) ;
+
 void create_random_array(star_t * array, int size);
 void sort(star_t* array, int n);
 void print_stars(star_t* array, int n);

@@ -1,2 +1,0 @@
-# HPC
-Examination assignment
