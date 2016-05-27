@@ -13,10 +13,11 @@
 
 #include "common.h"
 
-float uniform0to1Random();
-float myRandom(float a, float b);
+// float_t uniform0to1Random();
+// float_t myRandom(float_t a, float_t b);
 
-float distance(float x, float y, float z) ;
+// float_t distanceFromOrigin(point_t a);
+// float_t distance(point_t a, point_t b);
 
 void create_random_array(star_t * array, int size);
 void sort(star_t* array, int n);
@@ -24,6 +25,12 @@ void print_stars(star_t* array, int n);
 
 void fill_matrix(star_t * array, float_t **matrix, int size);
 void print_matrix(float_t** matrix, int n);
+
+// float_t getMinimum(float_t* arr, int size);
+// float_t getMaximum(float* arr, int size);
+
+// float getMinimum(float* arr, int size);
+// float getMaximum(float* arr, int size);
 
 hist_param_t generate_histogram(float_t **matrix, int *histogram, int mat_size, int hist_size);
 

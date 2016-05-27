@@ -1,4 +1,4 @@
-This file shows the expected output from print_stars() and print_matrix() and display_histogram() for the N=7 reference input given in ref_input.c.
+x§This file shows the expected output from print_stars() and print_matrix() and display_histogram() for the N=7 reference input given in ref_input.c.
 
 
 Star array before sort:
