@@ -21,7 +21,8 @@ void printtime(clock_t s, clock_t e)
 
 int main(int argc, char **argv)
 {
-  int N, i;
+  
+  int N, i, j;
   clock_t start, end;
   if(argc < 2)
   {
@@ -44,7 +45,7 @@ int main(int argc, char **argv)
   printf("sorting stars:    \t");
   start = clock();
 
-  sort(stars, N);
+  sort(stars,N);
    
   end = clock();
   printtime(start, end);
@@ -54,7 +55,7 @@ int main(int argc, char **argv)
   start = clock();
   
   float_t **matrix = (float_t **) malloc(N*sizeof(float_t *));
-  for (int i = 0; i < N; ++i)
+  for (i = 0; i < N; ++i)
     matrix[i] = (float_t *) malloc(N*sizeof(float_t));
    
   end = clock();
@@ -78,4 +79,13 @@ int main(int argc, char **argv)
   end = clock();
   printtime(start, end);
   display_histogram(histogram, histparams);
+
+  free(stars);
+
+  for (i = 0; i < N; ++i)
+    free(matrix[i]);
+
+  free(matrix);
+
+  free(histogram);
 }

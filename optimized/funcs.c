@@ -28,7 +28,10 @@ float_t myRandom(float_t a, float_t b)
 // Calculate the distance from the origin to the point 'a'.
 float_t distanceFromOrigin(point_t a) 
 {
-  return sqrt(pow(a.x, 2) + pow(a.y, 2) + pow(a.z, 2));
+  float_t dx = a.x * a.x;
+  float_t dy = a.y * a.y;
+  float_t dz = a.z * a.z;
+  return sqrt(dx + dy + dz);
 }
 
 // Calculate the distance between the points 'a' and 'b'.
@@ -37,13 +40,13 @@ float_t distance(point_t a, point_t b)
   float_t dx = b.x - a.x;
   float_t dy = b.y - a.y;
   float_t dz = b.z - a.z;
-  return sqrt(pow(dx, 2) + pow(dy, 2) + pow(dz, 2));
+  return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
 void create_random_array(star_t * stars, int size)
 {
-  int i;
-  for (i=0; i < size; i++)
+  int i = 0;
+  do 
   {
     star_t star;
     star.index = i;
@@ -59,7 +62,8 @@ void create_random_array(star_t * stars, int size)
     star.position.y = myRandom(-1e5, 1e5);
     star.position.z = myRandom(-3e3, 3e3);
     stars[i] = star;
-  } 
+    i++;
+  } while(i < size);
 }
 
 void print_stars(star_t* array, int n)
@@ -78,22 +82,103 @@ float_t starfunc(star_t a, star_t b)
   return sqrt(x + y + x*y/0.6);
 }
 
-// We have used Insertion sort in order to sort the stars in our array
-// with regard to the distance that each star has from the origin. 
-void sort(star_t* array, int n) 
+void insertion_sort(star_t* array, int n) 
 {
-  int i, j;
-  for (i = 1; i < n; ++i)
+  int i = 1, j;
+  while (i < n) 
   {
     star_t temp = array[i];
-    j = i-1;
-    while (j >= 0 && distanceFromOrigin(array[j].position) > distanceFromOrigin(temp.position)) 
+    float_t d = distanceFromOrigin(temp.position);
+    j = i - 1;
+    while (j >= 0 && distanceFromOrigin(array[j].position) > d) 
     {
       array[j+1] = array[j];
       j--;
     }
     array[j+1] = temp;
+    i++;
   }
+}
+
+void merge(star_t* arr, int l, int m, int r)
+{
+  int i, j, k;
+  int n1 = m - l + 1;
+  int n2 =  r - m;
+
+  star_t* L = (star_t*) malloc(n1 * sizeof(star_t));
+  star_t* R = (star_t*) malloc(n2 * sizeof(star_t));
+
+  for (i = 0; i < n1; i++)
+    L[i] = arr[l + i];
+  for (j = 0; j < n2; j++)
+    R[j] = arr[m + 1+ j];
+
+  i = 0; 
+  j = 0; 
+  k = l; 
+  while (i < n1 && j < n2)
+  {
+    if(distanceFromOrigin(L[i].position) <= distanceFromOrigin(R[j].position))
+    {
+      arr[k] = L[i];
+      i++;
+    }
+    else
+    {
+      arr[k] = R[j];
+      j++;
+    }
+    k++;
+  }
+
+  while (i < n1)
+  {
+    arr[k] = L[i];
+    i++;
+    k++;
+  }
+
+  while (j < n2)
+  {
+    arr[k] = R[j];
+    j++;
+    k++;
+  }
+
+  free(L);
+  free(R);
+}
+
+void merge_sort_helper(star_t* arr, int l, int r)
+{
+  if (l < r)
+  {
+    int m = l+(r-l)/2;
+    merge_sort_helper(arr, l, m);
+    merge_sort_helper(arr, m+1, r);
+    merge(arr, l, m, r);
+  }
+}
+
+void merge_sort(star_t* stars, int n) 
+{
+  merge_sort_helper(stars, 0, n-1);
+}
+
+// If the size of the array is greater than 43, we use merge sort
+// in order to improve the performance while decreasing the runtime.
+void sort(star_t* array, int n) 
+{
+//  if (n >= 2 && n <= 43) 
+//  {
+//    insertion_sort(array, n);
+//  }
+//  else 
+//  {
+    merge_sort(array, n);
+    printf("Merge sort was used. \n");
+//  }
 }
 
 void fill_matrix(star_t * array, float_t **matrix, int size)
@@ -154,48 +239,52 @@ float_t* generate_histogram_values(float_t **matrix, int mat_size)
       right = fabs(matrix[i][j] - matrix[i][j+1]);
       up = fabs(matrix[i][j] - matrix[i-1][j]);
       down = fabs(matrix[i][j] - matrix[i+1][j]);
-      mean = (left + right + up + down) / 4.0;
-      array[count] = mean;
-      count++;
     }
+    mean = (left + right + up + down) / 4.0;
+    array[count] = mean;
+    count++;
   return array;
 }
 
 hist_param_t generate_histogram(float_t **matrix, int *histogram, int mat_size, int hist_size)
 {
+  int size = (mat_size - 2) * (mat_size - 2);
   hist_param_t temp;
   temp.hist_size = hist_size;
 
   float_t* values = generate_histogram_values(matrix, mat_size);
 
-  temp.min = getMinimum(values, (mat_size - 2) * (mat_size - 2));
-  temp.max = getMaximum(values, (mat_size - 2) *  (mat_size - 2));
+  temp.min = getMinimum(values, size);
+  temp.max = getMaximum(values, size);
   temp.bin_size = (temp.max - temp.min) / (float_t)hist_size;
 
   float_t start = temp.min;
   float_t end = start + temp.bin_size;
 
-  int i, j;
+  int i, j, count;
   for (i = 0; i < hist_size; ++i)
   {
-    int count = 0;
-    for (j = 0; j < (mat_size - 2)*(mat_size - 2); ++j)
+    count = 0;
+
+    if (i == hist_size - 1)
     {
-      if (i == hist_size-1)
-      {
+      for (j=0; j < size; j++)
         if (values[j] >= start && values[j] <= temp.max)
           count ++;
-      }
-      else
-      {
-        if (values[j] >= start && values[j] <= end)
-        count ++;
-      }
     }
+    else 
+    {
+      for (j=0; j < size; j++)
+        if (values[j] >= start && values[j] <= end)
+          count ++;
+    }
+
     histogram[i] = count;
     start = end;
     end += temp.bin_size; 
   }
+
+  free(values);
 
   return temp;
 }
