@@ -21,7 +21,6 @@ void printtime(clock_t s, clock_t e)
 
 int main(int argc, char **argv)
 {
-  
   int N, i, j;
   clock_t start, end;
   if(argc < 2)
@@ -68,7 +67,7 @@ int main(int argc, char **argv)
 
   end = clock();
   printtime(start, end);
-  print_matrix(matrix, N);
+  //print_matrix(matrix, N);
   
   printf("generating histogram: \t");
   start = clock();

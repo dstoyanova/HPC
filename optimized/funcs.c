@@ -10,7 +10,7 @@
 
 #include "funcs.h"
 
-char spectralTypes[9] = {'O', 'B', 'A', 'F', 'G', 'K', 'M', 'L', 'T'};
+const char spectralTypes[9] = {'O', 'B', 'A', 'F', 'G', 'K', 'M', 'L', 'T'};
 
 // Returns uniformly distributed random numbers from [0.0, 1.0].
 float_t uniform0to1Random() 
@@ -26,24 +26,24 @@ float_t myRandom(float_t a, float_t b)
 }
 
 // Calculate the distance from the origin to the point 'a'.
-float_t distanceFromOrigin(point_t a) 
+float_t distanceFromOrigin(const point_t* a) 
 {
-  float_t dx = a.x * a.x;
-  float_t dy = a.y * a.y;
-  float_t dz = a.z * a.z;
+  float_t dx = a->x * a->x;
+  float_t dy = a->y * a->y;
+  float_t dz = a->z * a->z;
   return sqrt(dx + dy + dz);
 }
 
 // Calculate the distance between the points 'a' and 'b'.
-float_t distance(point_t a, point_t b) 
+float_t distance(const point_t* a, const point_t* b) 
 {
-  float_t dx = b.x - a.x;
-  float_t dy = b.y - a.y;
-  float_t dz = b.z - a.z;
+  float_t dx = b->x - a->x;
+  float_t dy = b->y - a->y;
+  float_t dz = b->z - a->z;
   return sqrt(dx*dx + dy*dy + dz*dz);
 }
 
-void create_random_array(star_t * stars, int size)
+void create_random_array(star_t* stars, int size)
 {
   int i = 0;
   do 
@@ -66,7 +66,7 @@ void create_random_array(star_t * stars, int size)
   } while(i < size);
 }
 
-void print_stars(star_t* array, int n)
+void print_stars(const star_t* array, int n)
 {
   int i;
   printf("\nprint_stars, n = %d:\n", n);
@@ -75,10 +75,10 @@ void print_stars(star_t* array, int n)
   printf("\n");
 }
 
-float_t starfunc(star_t a, star_t b)
+float_t starfunc(const star_t* a, const star_t* b)
 {
-  unsigned short x = a.subType;
-  unsigned short y = b.subType;
+  unsigned short x = a->subType;
+  unsigned short y = b->subType;
   return sqrt(x + y + x*y/0.6);
 }
 
@@ -88,9 +88,9 @@ void insertion_sort(star_t* array, int n)
   while (i < n) 
   {
     star_t temp = array[i];
-    float_t d = distanceFromOrigin(temp.position);
+    float_t d = distanceFromOrigin(&temp.position);
     j = i - 1;
-    while (j >= 0 && distanceFromOrigin(array[j].position) > d) 
+    while (j >= 0 && distanceFromOrigin(&array[j].position) > d) 
     {
       array[j+1] = array[j];
       j--;
@@ -119,7 +119,7 @@ void merge(star_t* arr, int l, int m, int r)
   k = l; 
   while (i < n1 && j < n2)
   {
-    if(distanceFromOrigin(L[i].position) <= distanceFromOrigin(R[j].position))
+    if(distanceFromOrigin(&L[i].position) <= distanceFromOrigin(&R[j].position))
     {
       arr[k] = L[i];
       i++;
@@ -170,23 +170,24 @@ void merge_sort(star_t* stars, int n)
 // in order to improve the performance while decreasing the runtime.
 void sort(star_t* array, int n) 
 {
-//  if (n >= 2 && n <= 43) 
-//  {
-//    insertion_sort(array, n);
-//  }
-//  else 
-//  {
+  if (n >= 2 && n <= 43) 
+  {
+    insertion_sort(array, n);
+    printf("Insertion sort was used. \n");
+  }
+  else 
+  {
     merge_sort(array, n);
     printf("Merge sort was used. \n");
-//  }
+  }
 }
 
-void fill_matrix(star_t * array, float_t **matrix, int size)
+void fill_matrix(star_t* __restrict array, float_t** __restrict matrix, int size)
 {
   int i, j;
   for (i = 0; i < size; ++i)
     for (j = 0; j < size; ++j)
-      matrix[i][j] = distance(array[i].position, array[j].position) + starfunc(array[i], array[j]);
+      matrix[i][j] = distance(&array[i].position, &array[j].position) + starfunc(&array[i], &array[j]);
 }
 
 void print_matrix(float_t** theMatrix, int n)
@@ -202,7 +203,7 @@ void print_matrix(float_t** theMatrix, int n)
 }
 
 // Find the minimum in the array.
-float_t getMinimum(float_t* arr, int size)
+float_t getMinimum(const float_t* arr, int size)
 {
   float_t min = arr[0];
   int i;
@@ -213,7 +214,7 @@ float_t getMinimum(float_t* arr, int size)
 }
 
 // Find the maximum in the array.
-float_t getMaximum(float_t* arr, int size)
+float_t getMaximum(const float_t* arr, int size)
 {
   float_t max = arr[0];
   int i;
@@ -246,7 +247,7 @@ float_t* generate_histogram_values(float_t **matrix, int mat_size)
   return array;
 }
 
-hist_param_t generate_histogram(float_t **matrix, int *histogram, int mat_size, int hist_size)
+hist_param_t generate_histogram(float_t** __restrict matrix, int* __restrict histogram, int mat_size, int hist_size)
 {
   int size = (mat_size - 2) * (mat_size - 2);
   hist_param_t temp;
@@ -289,7 +290,7 @@ hist_param_t generate_histogram(float_t **matrix, int *histogram, int mat_size, 
   return temp;
 }
 
-void display_histogram(int *histogram, hist_param_t histparams)
+void display_histogram(const int *histogram, hist_param_t histparams)
 {
   printf("\ndisplay_histogram:\n");
   int i,j;
