@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 
   end = clock();
   printtime(start, end);
-  //print_matrix(matrix, N);
+  print_matrix(matrix, N);
   
   printf("generating histogram: \t");
   start = clock();

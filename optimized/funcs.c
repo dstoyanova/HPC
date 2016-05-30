@@ -186,8 +186,17 @@ void fill_matrix(star_t* __restrict array, float_t** __restrict matrix, int size
 {
   int i, j;
   for (i = 0; i < size; ++i)
-    for (j = 0; j < size; ++j)
-      matrix[i][j] = distance(&array[i].position, &array[j].position) + starfunc(&array[i], &array[j]);
+    for (j = 0; j < size; j+=4)
+    {
+      if (&matrix[i][j] != NULL)
+        matrix[i][j] = distance(&array[i].position, &array[j].position) + starfunc(&array[i], &array[j]);
+      if (&matrix[i][j+1] != NULL)
+        matrix[i][j+1] = distance(&array[i].position, &array[j+1].position) + starfunc(&array[i], &array[j+1]);
+      if (&matrix[i][j+2] != NULL)
+        matrix[i][j+2] = distance(&array[i].position, &array[j+2].position) + starfunc(&array[i], &array[j+2]);
+      if (&matrix[i][j+3] != NULL)
+        matrix[i][j+3] = distance(&array[i].position, &array[j+3].position) + starfunc(&array[i], &array[j+3]);
+    }
 }
 
 void print_matrix(float_t** theMatrix, int n)
@@ -195,11 +204,11 @@ void print_matrix(float_t** theMatrix, int n)
   int i, j;
   printf("\nprint_matrix, n = %d:\n", n);
   for(i = 0 ; i < n; i++)
-    {
-      for(j = 0 ; j < n ; j++)
-	printf("%.2f " , theMatrix[i][j]);
-      putchar('\n');
-    }
+  {
+    for(j = 0 ; j < n ; j++)
+      printf("%.2f " , theMatrix[i][j]);
+    putchar('\n');
+  }
 }
 
 // Find the minimum in the array.
@@ -240,10 +249,10 @@ float_t* generate_histogram_values(float_t **matrix, int mat_size)
       right = fabs(matrix[i][j] - matrix[i][j+1]);
       up = fabs(matrix[i][j] - matrix[i-1][j]);
       down = fabs(matrix[i][j] - matrix[i+1][j]);
+      mean = (left + right + up + down) / 4.0;
+      array[count] = mean;
+      count++;
     }
-    mean = (left + right + up + down) / 4.0;
-    array[count] = mean;
-    count++;
   return array;
 }
 
